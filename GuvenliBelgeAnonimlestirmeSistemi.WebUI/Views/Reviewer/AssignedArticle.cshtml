@@ -1,0 +1,93 @@
+﻿@using Azure.Core
+@model List<ArticleViewModel>
+@{
+    ViewData["Title"] = "Hakeme Atanan Makaleler";
+    Layout = "~/Views/Shared/_HakemLayout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg rounded-4 p-4 border-0">
+        <h2 class="text-center mb-4">Makale Listesi</h2>
+
+        <table class="table table-hover table-bordered text-center align-middle shadow-sm">
+            <thead class="table-dark text-uppercase">
+                <tr>
+                    <th>Yüklenme Tarihi</th>
+                    <th>Son Yapılan İşlem Tarihi</th>
+                    <th>Konu Alanları</th>
+                    <th>Durum</th>
+                    <th>PDF</th>
+                    <th>İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var makale in Model)
+                {
+                    <tr class="align-middle">
+                        <input type="hidden" name="MakaleId" value="@makale.MakaleId" />
+
+                        <td>@makale.MakaleYuklemeTarihi.ToString("dd/MM/yyyy")</td>
+
+                        <td>
+                            @(makale.EnSonYapilanIsleminTarihi.HasValue
+                                ? makale.EnSonYapilanIsleminTarihi.Value.ToString("dd/MM/yyyy")
+                                : "<span class='text-muted'>-</span>")
+                        </td>
+
+                        <td>
+                            @if (makale.IlgiAlanlari != null && makale.IlgiAlanlari.Any())
+                            {
+                                <div class="d-flex flex-wrap justify-content-center gap-1">
+                                    @foreach (var alan in makale.IlgiAlanlari)
+                                    {
+                                        <span class="badge bg-info text-dark">@alan</span>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Belirtilmemiş</span>
+                            }
+                        </td>
+
+                        <td>
+                            @if (makale.MakaleDurumu >= ArticleStatus.HakemDegerlendirdi)
+                            {
+                                <span class="badge bg-success px-3 py-2">
+                                    <i class="fas fa-check-circle me-1"></i> Değerlendirildi
+                                </span>
+                            }
+                            else
+                            {
+                                    <span class="badge bg-warning text-dark px-3 py-2">
+                                        <i class="fas fa-hourglass-half me-1"></i> Değerlendirme Bekleniyor
+                                    </span>
+                            }
+                        </td>
+
+                        <td>
+                            @if (!string.IsNullOrEmpty(makale.AnonimPdfFilePath))
+                            {
+                                <a href="@makale.AnonimPdfFilePath" target="_blank" class="btn btn-sm btn-outline-danger" title="PDF'yi görüntüle">
+                                    <i class="fas fa-file-pdf me-1"></i> Görüntüle
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted"> Yok </span>
+                            }
+                        </td>
+
+                        <td>
+                            <a href="@Url.Action("EvaluateArticle", "Reviewer", new { id = makale.MakaleId })"
+                               class="btn btn-sm btn-info" title="Makaleyi değerlendir">
+                                <i class="fas fa-edit me-1"></i> Değerlendir
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

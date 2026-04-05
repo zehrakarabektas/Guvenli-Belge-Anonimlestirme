@@ -1,0 +1,237 @@
+﻿
+@{
+    ViewData["Title"] = "EditorMessagePage";
+    Layout = "~/Views/Shared/_EditorLayout.cshtml";
+}
+
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header text-white" style="background-color:#1c2331;">
+                    <h5><i class="fas fa-file-alt"></i> Makale Yazar Mesajları</h5>
+                </div>
+                <div class="list-group" id="makaleListesi">
+                    <p class="text-muted p-3">Makaleler yükleniyor...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header text-white" style=" background-color:#2d3750;">
+                    <h5><i class="fas fa-envelope"></i> Yazar ile Mesajlaşma</h5>
+                </div>
+                <div class="card-body chat-box" id="mesajlar" style="height: 400px; overflow-y: auto; background: #f9f9f9; padding: 10px;">
+                    <p class="text-muted text-center">Bir makale seçerek yazarın mesajlarını görüntüle.</p>
+                </div>
+                <div class="card-footer">
+                    <form id="messageForm">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="message" placeholder="Mesajınızı yazın...">
+                            <button type="button" class="btn btn-success" id="sendMessageBtn"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var selectedMakaleId = null;
+        var makaleIdleri = {};
+
+        function loadMakaleler() {
+            fetch("https://localhost:7057/api/Messages")
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (messages) {
+                    var makaleList = document.getElementById("makaleListesi");
+                    makaleList.innerHTML = "";
+                    makaleIdleri = {};
+
+                    if (messages.length === 0) {
+                        makaleList.innerHTML = "<p class='text-muted p-3'>Henüz yazar mesajı yok.</p>";
+                        return;
+                    }
+
+                    messages.forEach(function (msg) {
+                        if (!makaleIdleri[msg.makaleId]) {
+                            makaleIdleri[msg.makaleId] = true;
+
+                            var button = document.createElement("button");
+                            button.className = "list-group-item list-group-item-action";
+                            button.innerText = "Makale " + msg.makaleId;
+                            button.setAttribute("data-id", msg.makaleId);
+                            button.onclick = function () {
+                                selectedMakaleId = this.getAttribute("data-id");
+                                loadMessages(selectedMakaleId, true); 
+                            };
+                            makaleList.appendChild(button);
+                        }
+                    });
+                })
+                .catch(function (error) {
+                    console.error("Mesajları yüklerken hata oluştu:", error);
+                });
+        }
+
+        function loadMessages(makaleId, scrollToBottom ) {
+            fetch("https://localhost:7057/api/Messages/GetMessagesByArticle?articleId=" + makaleId)
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (messages) {
+                    var mesajList = document.getElementById("mesajlar");
+                    mesajList.innerHTML = "";
+
+                    if (messages.length === 0) {
+                        mesajList.innerHTML = "<p class='text-muted text-center'>Bu yazara ait mesaj bulunamadı.</p>";
+                        return;
+                    }
+                    messages.forEach(function (msg) {
+                        var messageDiv = document.createElement("div");
+                        var messageClass = msg.sendRol === 1 ? "mesaj-kullanici" : "mesaj-editor";
+                        var senderText = msg.sendRol === 1 ? "<b>Yazar</b><br/>" : "";
+                        var formattedTime = new Date(msg.sendTime).toLocaleTimeString("tr-TR", {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+
+                        messageDiv.className = "mesaj " + messageClass;
+                        messageDiv.innerHTML = senderText + msg.messageContent + " <small>" + formattedTime + "</small>";
+
+                        mesajList.appendChild(messageDiv);
+                    });
+
+                    if (scrollToBottom==true) {
+                        requestAnimationFrame(function () {
+                            mesajList.scrollTop = mesajList.scrollHeight;
+                        });
+                    }
+                })
+                .catch(function (error) {
+                    console.error("Mesajları çekerken hata oluştu:", error);
+                });
+        }
+
+        function sendMessage() {
+            var messageInput = document.getElementById("message");
+            var messageContent = messageInput.value.trim();
+            
+            if (!selectedMakaleId) {
+                alert("Yanıt göndermek için önce bir makale seçmelisiniz.");
+                return;
+            }
+            if (messageContent === "") {
+                alert("Mesaj içeriği boş olamaz.");
+                return;
+            }
+
+            var mesajList = document.getElementById("mesajlar");
+            var messageDiv = document.createElement("div");
+            messageDiv.className = "mesaj mesaj-editor";
+            messageDiv.innerHTML =  messageContent + " <small>" +
+                   new Date().toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' }) + "</small>";
+            mesajList.appendChild(messageDiv);
+
+            mesajList.scrollTop = mesajList.scrollHeight;
+
+            messageInput.value = "";
+
+            var newMessage = {
+                makaleId: parseInt(selectedMakaleId),
+                messageContent: messageContent,
+                sendRol: 0
+            };
+             
+            fetch("https://localhost:7057/api/Messages", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newMessage)
+            })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("Mesaj gönderilemedi.");
+                }
+                return response.json();
+            })
+            .then(function (data) {
+                loadMessages(selectedMakaleId, false);
+            })
+            .catch(function (error) {
+                console.error("Mesaj gönderilirken hata oluştu:", error);
+            });
+        }
+
+        setInterval(function () {
+            if (selectedMakaleId) {
+                loadMessages(selectedMakaleId, false);
+            }
+        }, 5000);
+
+        loadMakaleler();
+
+        document.getElementById("sendMessageBtn").onclick = sendMessage;
+    });
+
+
+
+</script>
+
+<style>
+    .chat-box {
+        background: #f9f9f9;
+        padding: 10px;
+        height: 400px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mesaj-editor {
+        background: #D0D5EC;
+        color: black;
+        border: 1px solid #A6AECF;
+        padding: 10px;
+        margin: 5px;
+        border-radius: 15px;
+        max-width: 70%;
+        align-self: flex-end;
+        text-align: right;
+    }
+    .mesaj-kullanici {
+        background: #F1F0F0;
+        color: black;
+        border: 1px solid #D1D1D1;
+        padding: 10px;
+        margin: 5px;
+        border-radius: 15px;
+        max-width: 70%;
+        align-self: flex-start;
+        text-align: left;
+    }
+
+    #sendMessageBtn {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+        #sendMessageBtn:focus,
+        #sendMessageBtn:hover,
+        #sendMessageBtn:active {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+    .mesaj small {
+        display: block;
+        text-align:right;
+        margin-top: 5px;
+        font-size: 12px;
+        color: #666;
+    }
+
+
+</style>

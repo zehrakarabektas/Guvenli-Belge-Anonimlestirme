@@ -1,0 +1,76 @@
+﻿@model ArticleViewModel
+@{
+    ViewData["Title"] = "AnonymizedArticle";
+    Layout = "~/Views/Shared/_EditorLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card shadow p-4">
+        <h2 class="text-center mb-4" style="color:#5e6785;">Makale Anonimleştirme İşlemi</h2>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Anonimleştirme Seçenekleri:</h5>
+                <form id="anonimlestirmeForm">
+                    <input type="hidden" name="MakaleId" value="@Model.MakaleId" />
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="AnonimYazarAdi" id="AnonimYazarAdi">
+                        <label class="form-check-label" for="AnonimYazarAdi">Yazar Ad-Soyad</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="AnonimYazarIletisim" id="AnonimYazarIletisim">
+                        <label class="form-check-label" for="AnonimYazarIletisim">Yazar İletişim Bilgileri</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="AnonimYazarKurum" id="AnonimYazarKurum">
+                        <label class="form-check-label" for="AnonimYazarKurum">Yazar Kurum Bilgileri</label>
+                    </div>
+
+                    <button type="button" id="anonimlestirBtn" class="btn btn-success mt-3">
+                        <i class="fas fa-user-secret"></i> Anonimleştir
+                    </button>
+                    <button type="submit" formaction="@Url.Action("AnonimKaldir", "Article")" formmethod="post"
+                            class="btn btn-danger mt-3"
+                    @(string.IsNullOrEmpty(Model.AnonimPdfFilePath) ? "disabled" : "")>
+                        <i class="fas fa-eye-slash"></i> Anonimleştirmeyi Kaldır
+                    </button>
+
+
+                </form>
+            </div>
+
+            <div class="col-md-6 text-center">
+                <h5>Makale Önizleme</h5>
+                <iframe id="pdfPreview" src="@Model.PdfFilePath" width="100%" height="400px"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#anonimlestirBtn").click(function () {
+            var formData = $("#anonimlestirmeForm").serialize();
+
+            $.ajax({
+                url: "@Url.Action("Anonimlestir", "Article")",
+                type: "POST",
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        $("#pdfPreview").attr("src", response.anonimPdfPath); 
+                    } else {
+                        alert("Anonimleştirme başarısız!");
+                    }
+                },
+                error: function () {
+                    alert("Bir hata oluştu!");
+                }
+            });
+        });
+    });
+</script>

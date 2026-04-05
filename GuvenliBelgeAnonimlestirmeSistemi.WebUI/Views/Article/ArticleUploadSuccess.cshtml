@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "ArticleUploadSuccess";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container mt-4">
+    <div class="card shadow-lg p-3 text-center">
+        
+
+        <div class="d-flex justify-content-center mt-3">
+
+            <img src="~/images/makaleyuklendi.png" alt="Makale Yüklendi" class="img-fluid" style="max-width: 100px;">
+         
+        </div>
+        <br />
+        <h2>Makaleniz başarıyla yüklendi!</h2>
+        @if (ViewBag.TrackingId != null)
+        {
+            <p><strong>Takip Numaranız:</strong></p>
+            <h3 class="text" style=" color:#5e6785;">@ViewBag.TrackingId</h3>
+            <p>Lütfen takip numaranızı kaydedin. Makalenizi takip etmek için bu numarayı kullanacaksınız.</p>
+        }
+        else
+        {
+            <p>Takip numarası oluşturulurken bir hata meydana geldi.</p>
+        }
+
+        <a href="/Users/UserHome" class="btn mt-3" style=" background-color:#2d3750; color:white;">Kullanıcı Sayfasına Dön</a>
+    </div>
+</div>

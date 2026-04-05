@@ -1,0 +1,29 @@
+﻿
+@{
+    ViewData["Title"] = "ArticleInquiry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center">Makale Durum Sorgulama</h2>
+    <p class="text-center">Takip numaranız ile makalenizin değerlendirme sürecini takip edebilirsiniz.</p>
+
+    @if (ViewBag.Hata != null)
+    {
+        <div class="alert alert-danger text-center">@ViewBag.Hata</div>
+    }
+
+    <form method="post" asp-controller="Article" asp-action="ArticleInquiry">
+        <div class="mb-3">
+            <label for="makaleTakipNo" class="form-label">Takip Numarası:</label>
+            <input type="text" class="form-control" id="makaleTakipNo" name="makaleTakipNo" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">E-Posta Adresi:</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Sorgula</button>
+    </form>
+</div>
+

@@ -1,0 +1,58 @@
+﻿@using GuvenliBelgeAnonimlestirmeSistemi.WebUI.Models.Reviewer
+@model List<ReviewerDto>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<form asp-controller="Reviewer" asp-action="AssignedArticle" method="get">
+    <div class="container pt-4">
+        <div class="row">
+            <div class="col-12 text-center mb-2">
+                <h4 class="fw-bold " style="color:#2d3750;">Giriş Yapmak İçin Bir Hakem Seçiniz</h4>
+                <p class="text-muted">Lütfen aşağıdaki listeden bir hakem seçerek giriş yapın.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            @foreach (var hakem in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-person-circle" style="font-size: 3rem;"></i>
+                            <h5 class="card-title mt-2">@hakem.EPosta</h5>
+                        </div>
+                        <div class="card-footer text-center">
+                            <input type="radio" class="btn-check" id="hakem_@hakem.ReviewerId" name="id" value="@hakem.ReviewerId" autocomplete="off">
+                            <label class="btn btn-custom"  for="hakem_@hakem.ReviewerId">Seç</label>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <button type="submit" class="btn btn-success">
+            <i class="fas fa-sign-in-alt"></i> Seçili Hakeme Giriş Yap
+        </button>
+    </div>
+</form>
+
+<style>
+    .btn-custom {
+        background-color: white; 
+        color: black;
+        border: 2px solid #2d3750; 
+        padding: 8px 16px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-check:checked + .btn-custom {
+        background-color: #2d3750; 
+        color: white; 
+        border: 2px solid #1c2331;
+        box-shadow: -3px 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+</style>

@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Editör Paneli</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/GuvenliBelgeAnonimlestirmeSistemi.WebUI.styles.css" asp-append-version="true" />
+
+    <style>
+        body {
+            padding-top: 80px; 
+            background-color: #f8f9fa; 
+        }
+
+        .navbar-brand img {
+            height: 60px;
+        }
+
+        .navbar-nav .nav-link {
+            font-size: 16px;
+            font-weight: bold;
+            color: #5e6785 !important; 
+        }
+
+            .navbar-nav .nav-link:hover {
+                color: #2d3750 !important;
+                text-decoration: underline;
+            }
+
+        .custom-button {
+            background-color: #5e6785 !important;
+            color: white !important;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            border: none;
+        }
+
+            .custom-button:hover {
+                background-color: #1c2331 !important;
+                color: white !important;
+            }
+
+            .custom-button i {
+                font-size: 18px;
+            }
+
+        .footer {
+            background-color: #f8f9fa;
+            color: black;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            padding: 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo.png" alt="AkademiX Logo">
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home"></i> Ana Sayfa
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Editor" asp-action="ArticleListt">
+                                <i class="fas fa-file-alt"></i> Makaleler
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Editor" asp-action="Reviewers">
+                                <i class="fas fa-user"></i> Hakemler
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Message" asp-action="EditorMessagePage">
+                                <i class="fas fa-envelope"></i> Mesajlar
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container-fluid mt-4">
+        <div class="card shadow">
+            <main role="main">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+
+    <footer class="footer">
+        <div class="container">
+            &copy; 2025 - GuvenliBelgeAnonimlestirmeSistemi.WebUI - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-dark">Gizlilik Politikası</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

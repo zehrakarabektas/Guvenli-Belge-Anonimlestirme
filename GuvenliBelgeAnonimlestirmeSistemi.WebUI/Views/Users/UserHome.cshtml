@@ -1,0 +1,63 @@
+﻿
+@{
+    ViewData["Title"] = "UserHome";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+
+    .option-card {
+        width: 100%;
+        max-width: 400px;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 10px;
+        text-align: center;
+        background-color: white;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+    .option-img {
+        width: 100%;
+        max-width: 250px;
+        height: 180px;
+        object-fit: contain;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        padding: 5px;
+    }
+
+    .option-card .btn {
+        margin-top: 10px;
+        width: 100%;
+    }
+</style>
+<div class="container mt-5">
+    <div class="row justify-content-center g-4">
+
+        <div class="col-lg-4 col-md-6 d-flex justify-content-center">
+            <div class="option-card">
+                <img src="~/images/makaleyukle.png" class="option-img" alt="Makale Yükle">
+                <h4 class="fw-bold mt-3">Makale Yükle</h4>
+                <p>Değerlendirme için makalenizi sisteme yükleyin.</p>
+                <a href="/Article/ArticleUpload" class="btn" style=" background-color: #003366; color: white;">Yükle</a>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 d-flex justify-content-center">
+            <div class="option-card">
+                <img src="~/images/makalesorgula.png" class="option-img" alt="Makale Durum Sorgula">
+                <h4 class="fw-bold mt-3">Makale Durum Sorgula</h4>
+                <p>Makalenizin değerlendirme sürecini takip edin.</p>
+                <a href="/Article/ArticleInquiry" class="btn btn-success">Sorgula</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+

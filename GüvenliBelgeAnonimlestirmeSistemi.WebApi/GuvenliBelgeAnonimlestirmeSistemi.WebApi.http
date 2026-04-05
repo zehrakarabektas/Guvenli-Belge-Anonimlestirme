@@ -1,0 +1,6 @@
+@GuvenliBelgeAnonimlestirmeSistemi.WebApi_HostAddress = http://localhost:5047
+
+GET {{GuvenliBelgeAnonimlestirmeSistemi.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,104 @@
+﻿@model ArticleViewModel
+@{
+    ViewData["Title"] = "EvaluateArticle";
+    Layout = "~/Views/Shared/_HakemLayout.cshtml";
+}
+
+<div class="container mt-1">
+    <div class="card shadow-lg p-4 rounded">
+        <h2 class="text-center mb-0">
+            <i class="fas fa-file-alt me-2 custom-title"></i> Makale Değerlendirme Paneli
+        </h2>
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-1"></i> @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-1"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm p-3 h-100">
+                    <div class="position-relative mb-3">
+                        <h5 class="text-center text-secondary">
+                            <i class="fas fa-eye me-1"></i> Anonim PDF Önizleme
+                        </h5>
+                        @if (!string.IsNullOrEmpty(Model.AnonimPdfFilePath))
+                        {
+                            <a href="@Model.AnonimPdfFilePath" target="_blank" download class="btn btn-outline-danger btn-sm position-absolute no-focus-shadow" style="top: 0; right: 0;">
+                                <i class="fas fa-download me-1"></i> PDF İndir
+                            </a>
+                        }
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.AnonimPdfFilePath))
+                    {
+                        <iframe src="@Model.AnonimPdfFilePath" width="100%" height="600px" style="border:1px solid #ccc; border-radius:8px;"></iframe>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning text-center">PDF bulunamadı.</div>
+                    }
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm p-3 h-100">
+                    <h5 class="text-center text-secondary mb-3">
+                        <i class="fas fa-edit me-1"></i> Değerlendirme Formu
+                    </h5>
+
+                    <form asp-action="SubmitReview" asp-controller="Reviewer" method="post">
+                        <input type="hidden" name="MakaleId" value="@Model.MakaleId" />
+
+                        <div class="mb-3">
+                            <label for="reviewerComments" class="form-label fw-bold">Hakem Değerlendirmesi</label>
+                            <textarea id="reviewerComments"
+                                      name="ReviewText"
+                                      class="form-control custom-textarea @(string.IsNullOrWhiteSpace(Model.HakemDegerlendirmesi) ? "" : "bg-success bg-opacity-10 border-success text-dark")"
+                                      rows="10"
+                                      placeholder="Makale hakkındaki değerlendirmelerinizi buraya yazın..."
+                            @(Model.MakaleDurumu >= ArticleStatus.HakemDegerlendirdi ? "readonly" : "")>@Model.HakemDegerlendirmesi</textarea>
+
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <button type="submit" class="btn btn-success px-4 shadow"
+                            @(Model.MakaleDurumu >= ArticleStatus.HakemDegerlendirdi ? "disabled" : "")>
+                                <i class="fas fa-check-circle me-1"></i> Kaydet ve Gönder
+                            </button>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-textarea:focus {
+        border-color: #ccc !important;
+        box-shadow: none !important;
+    }
+
+    .custom-textarea {
+        border: 1px solid #ccc;
+        transition: border 0.3s ease-in-out;
+    }
+
+    iframe {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-title {
+        margin-bottom: 8px; 
+    }
+</style>

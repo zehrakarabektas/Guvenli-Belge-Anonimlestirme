@@ -1,0 +1,152 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<style>
+    .hero-section {
+        position: relative;
+        background-image: url('/images/resim6.png'); 
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 380px; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: white;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4); 
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        max-width: 700px;
+        text-align: center;
+    }
+
+        .hero-content h1 {
+            font-size: 38px;
+            font-weight: bold;
+        }
+
+        .hero-content p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+    .hero-btn {
+        background-color: #d9534f;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+    }
+
+        .hero-btn:hover,
+        .hero-btn:focus {
+            background-color: #c9302c !important; 
+            color: white !important;
+            text-decoration: none;
+            box-shadow: none !important;
+            outline: none !important; 
+        }
+
+    .card-container {
+        margin-top: -80px;
+    }
+
+    .custom-card {
+        width: 100%;
+        max-width: 500px;
+        height: 320px;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 10px;
+        text-align: center;
+        background-color: white;
+        transition: transform 0.3s ease-in-out;
+    }
+
+        .custom-card:hover {
+            transform: translateY(-10px);
+        }
+
+    .card-icon {
+        font-size: 40px;
+        color: #2d3750;
+    }
+
+    .col-lg-5th {
+        width: 20%; 
+        display: block;
+    }
+
+    .card-img-top {
+        width: 100%;
+        height: 180px; 
+        object-fit: contain; 
+        border-radius: 8px;
+    }
+</style>
+<div class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1>Akademik Makale Değerlendirme Sistemi</h1>
+        <p>Makalenizi yükleyin, değerlendirme sürecini takip edin ve sonuçları alın.</p>
+        <a href="/Article/ArticleUpload" class="hero-btn">Hemen Makale Yükleyin</a>
+    </div>
+</div>
+<div class="container card-container">
+    <div class="row justify-content-center g-4">
+       
+        <div class="col-lg-5th col-md-4 col-sm-6">
+            <div class="custom-card">
+                <img src="~/images/resim1.png" class="card-img-top" alt="Makale Yükleme">
+                <h5 class="mt-3 fw-bold">1. Aşama</h5>
+                <p>Değerlendirilmesini istediğin makaleni yükle.</p>
+            </div>
+        </div>
+
+        <div class="col-lg-5th col-md-4 col-sm-6">
+            <div class="custom-card">
+                <img src="~/images/resim2.png" class="card-img-top" alt="Editör İncelemesi">
+                <h5 class="mt-3 fw-bold">2. Aşama</h5>
+                <p>Editör makaleyi anonimleştirerek ilgili hakeme gönderir.</p>
+            </div>
+        </div>
+
+        <div class="col-lg-5th col-md-4 col-sm-6">
+            <div class="custom-card">
+                <img src="~/images/resim3.png" class="card-img-top" alt="Hakem Değerlendirmesi">
+                <h5 class="mt-3 fw-bold">3. Aşama</h5>
+                <p>Hakem makaleyi değerlendirir ve sonucunu editöre gönderir.</p>
+            </div>
+        </div>
+
+        <div class="col-lg-5th col-md-4 col-sm-6">
+            <div class="custom-card">
+                <img src="~/images/resim4.png" class="card-img-top" alt="Sonuç Bildirimi">
+                <h5 class="mt-3 fw-bold">4. Aşama</h5>
+                <p>Editör, hakem değerlendirme sonucu ile makaleyi yazara iletir.</p>
+            </div>
+        </div>
+
+        <div class="col-lg-5th col-md-4 col-sm-6">
+            <div class="custom-card">
+                <img src="~/images/resim5.png" class="card-img-top" alt="Takip Sistemi">
+                <h5 class="mt-3 fw-bold">5. Aşama</h5>
+                <p>Takip numarası ile makalenin durumu ve değerlendirme sonucu takip edilebilir.</p>
+            </div>
+        </div>
+    </div>
+</div>

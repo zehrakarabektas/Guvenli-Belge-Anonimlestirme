@@ -1,0 +1,10 @@
+
+venv/
+ENV/
+.env
+
+bin/
+obj/
+
+.vs/
+*.user

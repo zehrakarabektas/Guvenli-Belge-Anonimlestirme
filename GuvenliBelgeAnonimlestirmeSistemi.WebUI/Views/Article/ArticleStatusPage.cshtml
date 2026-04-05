@@ -1,0 +1,428 @@
+﻿@using GuvenliBelgeAnonimlestirmeSistemi.WebUI.Models.Article
+@model ArticleDto
+@{
+    ViewData["Title"] = "ArticleStatusPage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container mt-4">
+    <div class="card shadow p-4">
+        <h2 class="text-center mb-4" style=" color:#5e6785;">Makale Durumu</h2>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="text-center">Makale Bilgileri</h5>
+                <p><strong>Makale Numarası:</strong> @Model.MakaleId</p>
+                <p><strong>Makale Takip Numarası:</strong> @Model.TakipNo</p>
+                @{
+                    string badgeStyle;
+                    string badgeText;
+
+                    switch (@Model.MakaleDurumu)
+                    {
+                        case ArticleStatus.MakaleBeklemede:
+                            badgeStyle = "background-color: #ffecb3; color: #856404;";
+                            badgeText = "Değerlendirme Bekleniyor";
+                            break;
+                        case ArticleStatus.RevizeEdildi:
+                            badgeStyle = "background-color: #f8d7da; color: #721c24;";
+                            badgeText = "Revizyon Yapıldı";
+                            break;
+                        case ArticleStatus.EditorIncelemede:
+                            badgeStyle = "background-color: #cce5ff; color: #004085;";
+                            badgeText = "Editör İncelemesinde";
+                            break;
+                        case ArticleStatus.HakemeAtandi:
+                            badgeStyle = "background-color: #d1ecf1; color: #0c5460;";
+                            badgeText = "Hakeme Gönderildi";
+                            break;
+                        case ArticleStatus.HakemDegerlendirilmesinde:
+                            badgeStyle = "background-color: #e2e3e5; color: #383d41;";
+                            badgeText = "Hakem Değerlendiriyor";
+                            break;
+                        case ArticleStatus.HakemDegerlendirdi:
+                            badgeStyle = "background-color: #d4edda; color: #155724;";
+                            badgeText = "Hakem Değerlendirmesi Tamamlandı";
+                            break;
+                        case ArticleStatus.EditorSonuclandirmada:
+                            badgeStyle = "background-color: #b8daff; color: #004085;";
+                            badgeText = "Sonuç Hazırlanıyor";
+                            break;
+                        case ArticleStatus.MakaleSonuclandirildi:
+                            badgeStyle = "background-color: #c3e6cb; color: #155724;";
+                            badgeText = "Değerlendirme Tamamlandı";
+                            break;
+                        case ArticleStatus.MakaleSonucuYazaraIletildi:
+                            badgeStyle = "background-color: #c3e6cb; color: #155724;";
+                            badgeText = "Sonuç İletildi";
+                            break;
+                        default:
+                            badgeStyle = "background-color: #fefefe; color: #818182;";
+                            badgeText = "Bilinmeyen Durum";
+                            break;
+                    }
+                }
+
+                <p>
+                    <strong>Durum:</strong> <span class="text-info">
+                        <span class="badge" style="@badgeStyle">
+                            @badgeText
+                        </span>
+                    </span>
+                </p>
+                
+
+
+                <div class="mt-3">
+                    <h5>Revize Makale Yükle</h5>
+                    <form asp-controller="Article" asp-action="UpdateArticle" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="makaleNo" id="makaleNo" value="@Model.MakaleId" />
+                        <input type="file" name="revizeDosya" class="form-control" required />
+                        <button type="submit" class="btn btn-outline-danger mt-2"><i class="fa-solid fa-edit"></i> Revizyonu Yükle</button>
+                    </form>
+                </div>
+                
+            </div>
+
+            <div class="col-md-6 text-center">
+                <h5>Makale Önizleme</h5>
+                <iframe id="pdfPreview" src="@($"{Model.PdfFilePath}?v={DateTime.Now.Ticks}")" width="100%" height="400px"></iframe>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.PdfFilePath))
+    {
+        bool makaleIletildi = Model.MakaleDurumu == ArticleStatus.MakaleSonucuYazaraIletildi;
+
+        <div class="card shadow p-4 mt-4">
+            <h5 class="text-center text-success">Hakem Geri Bildirimleri ve Sonuç</h5>
+            <div class="d-flex justify-content-center align-items-center gap-3">
+                <a id="showPdfPreview"
+                   class="btn"
+                   style="background-color:#2d3750; color:white; @(makaleIletildi ? "" : "pointer-events: none; opacity: 0.6;")"
+                   target="_blank">
+                    <i class="fas fa-eye me-1"></i> Sonuç Raporunu Görüntüle
+                </a>
+                <a href="@(makaleIletildi ? Url.Content(Model.SonucPdfFilePath) : "#")"
+                   class="btn btn-danger @(makaleIletildi ? "" : "disabled")"
+                   download="SonucRaporu.pdf">
+                    <i class="fas fa-download me-1"></i> PDF İndir
+                </a>
+            </div>
+        </div>
+
+        <div id="pdfPreviewContainer" style="display: none; margin-top: 20px;">
+           
+            <iframe src="@Url.Content(Model.SonucPdfFilePath + "?v=" + DateTime.Now.Ticks)" width="100%" height="500px" style="border:1px solid #ccc; border-radius:8px;"></iframe>
+        </div>
+
+        <script>
+            document.getElementById("showPdfPreview").addEventListener("click", function () {
+                var container = document.getElementById("pdfPreviewContainer");
+                if (container.style.display === "none") {
+                    container.style.display = "block";
+                } else {
+                    container.style.display = "none";
+                }
+            });
+        </script>
+    }
+   
+
+    
+
+</div>
+
+<div id="mesajPaneli" class="mesaj-panel shadow-lg">
+    <div class="mesaj-baslik">
+        <h5><i class="fa-solid fa-envelope"></i> Editör ile Mesajlaşma</h5>
+    </div>
+    <div id="mesajlar" class="mesaj-icerik"></div>
+
+    <form id="mesajForm" class="mesaj-form">
+        <input type="hidden" id="makaleId" value="@Model.MakaleId" />
+        <div class="input-group">
+            <input type="text" id="mesajInput" class="form-control" placeholder="Mesajınızı yazın..." required />
+            <button type="submit" class="btn btn-success">
+                <span><i class="fa-regular fa-paper-plane"></i></span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<button id="mesajAc" class="mesaj-toggle btn btn-primary">
+    <i class="fa-solid fa-envelope"></i> Mesajlar
+</button>
+
+<div id="mesajPaneli" class="mesaj-panel shadow-lg">
+    <div class="mesaj-baslik">
+        <h5><i class="fa-solid fa-envelope"></i> Editör ile Mesajlaşma</h5>
+    </div>
+    <div id="mesajlar" class="mesaj-icerik">
+    </div>
+    <form id="mesajForm" class="mesaj-form">
+        <input type="hidden" name="makaleNo" id="makaleNo" value="@Model.MakaleId" />
+        <div class="input-group">
+            <input type="text" id="mesajInput" class="form-control" placeholder="Mesajınızı yazın..." required />
+            <button type="submit" class="btn btn-success">
+                <span><i class="fa-regular fa-paper-plane"></i> Gönder</span>
+            </button>
+        </div>
+    </form>
+
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+       $(document).ready(function () {
+        const mesajInput = $("#mesajInput");
+        const mesajForm = $("#mesajForm");
+        const mesajList = $("#mesajlar");
+        const makaleId = $("#makaleNo").val();
+
+        $("#mesajAc").click(function () {
+            $("#mesajPaneli").toggleClass("acik");
+
+            if ($("#mesajPaneli").hasClass("acik")) {
+                $("#mesajAc").addClass("buton-kucuk").html('<i class="fa-solid fa-comments"></i>').css({
+                    "right": "310px",
+                    "width": "40px",
+                    "height": "50px"
+                });
+            } else {
+                $("#mesajAc").removeClass("buton-kucuk").html('<i class="fa-solid fa-envelope"></i> Mesajlar').css({
+                    "right": "20px",
+                    "width": "150px",
+                    "height": "50px"
+                });
+            }
+        });
+
+        $("#mesajKapat").click(function () {
+            $("#mesajPaneli").removeClass("acik");
+            $("#mesajAc").removeClass("buton-kucuk").html('<i class="fa-solid fa-envelope"></i> Mesajlar').css({
+                "right": "20px",
+                "width": "150px",
+                "height": "50px"
+            });
+        });
+
+        async function sendMessage(event) {
+            event.preventDefault();
+
+            const mesajContent = mesajInput.val().trim();
+            if (!mesajContent) {
+                alert("Mesaj boş olamaz!");
+                return;
+            }
+
+            const mesajData = {
+                MakaleId: parseInt(makaleId),
+                SendRol: 1,
+                MessageContent: mesajContent
+            };
+
+            try {
+                const response = await fetch("https://localhost:7057/api/Messages", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(mesajData)
+                });
+
+                if (!response.ok) throw new Error(`API Hatası: ${response.status}`);
+
+                mesajInput.val("");
+                await loadMessages();
+            } catch (error) {
+                console.error("Mesaj gönderirken hata oluştu:", error);
+            }
+        }
+
+        mesajForm.on("submit", sendMessage);
+
+        async function loadMessages() {
+            try {
+                const response = await fetch(`https://localhost:7057/api/Messages/GetMessagesByArticle?articleId=${makaleId}`);
+                const messages = await response.json();
+
+                mesajList.empty();
+
+                messages.forEach(msg => {
+                    const messageClass = msg.sendRol === 1 ? "mesaj-sag" : "mesaj-sol";
+                    const senderText = msg.sendRol === 0 ? "<b>Editor</b><br/>" : "";
+
+                    const messageItem = $(`
+                        <div class="mesaj ${messageClass}">
+                            ${senderText} ${msg.messageContent}
+                            <br><small>${new Date(msg.sendTime).toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' })}</small>
+                        </div>
+                    `);
+                    mesajList.append(messageItem);
+                });
+
+                mesajList.scrollTop(mesajList[0].scrollHeight);
+            } catch (error) {
+                console.error("Mesajları çekerken hata oluştu:", error);
+            }
+        }
+
+        loadMessages();
+        setInterval(loadMessages, 5000);
+    });
+
+</script>
+
+<style>
+    .mesaj-panel {
+        display: block;
+        position: fixed;
+        right: -350px;
+        top: 88px;
+        width: 300px;
+        height: 650px;
+        background: white;
+        border-left: 2px solid #2d3750;
+        box-shadow: -3px 0 10px rgba(0, 0, 0, 0.2);
+        transition: right 0.5s ease-in-out;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+    }
+        .mesaj-panel.acik {
+            right: 10px;
+        }
+
+    .mesaj-baslik {
+        background: #1c2331;
+        color: white;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+    }
+
+    .mesaj-icerik {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+        background: #f8f9fa;
+    }
+
+    .mesaj-form {
+        padding: 10px;
+        background: #fff;
+        border-top: 1px solid #ddd;
+    }
+
+    .mesaj-toggle {
+        background-color: #1c2331;
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 1001;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 30px;
+        width: 150px;
+        height: 50px;
+        text-align: center;
+        transition: all 0.5s ease-in-out; 
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+        outline: none !important;
+        box-shadow: none !important; 
+
+    }
+        .mesaj-toggle,
+        .mesaj-toggle:hover,
+        .mesaj-toggle:focus,
+        .mesaj-toggle:active {
+            background-color: #1c2331 !important; 
+            color: white !important;
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+            transition: none !important; 
+        }
+
+    .buton-kucuk {
+        background-color: #1c2331;
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 16px;
+        padding: 8px;
+        border-top-right-radius:2px;
+        border-bottom-right-radius:2px;
+        text-align: center;
+        transition: all 0.5s ease-in-out;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    .mesaj {
+        width: 220px;
+        padding: 10px 15px;
+        margin: 8px;
+        border-radius: 18px;
+        font-size: 14px;
+        display: block;
+        position: relative;
+        word-wrap: break-word;
+    }
+
+    .mesaj-sag {
+        background-color: #D0D5EC; 
+        color: black;
+        align-self: flex-end;
+        text-align: left;
+        border: 1px solid #A6AECF;
+        border-top-right-radius: 5px;
+        margin-left: auto; 
+        margin-right: 0px;
+    }
+
+    .mesaj-sol {
+        background-color: #F1F0F0;
+        color: black;
+        align-self: flex-start;
+        text-align: left;
+        border: 1px solid #D1D1D1;
+        border-top-left-radius: 5px;
+        margin-right: auto; 
+        margin-left: 0px;
+    }
+
+    .mesaj + .mesaj {
+        margin-top: 5px;
+    }
+
+    .mesaj small {
+        display: block;
+        text-align: right;
+        font-size: 12px;
+        color: gray;
+        margin-top: 5px;
+    }
+
+    .mesaj-sag::after {
+        content: "";
+        position: absolute;
+        right: -10px;
+        top: 10px;
+        border-width: 10px;
+        border-style: solid;
+        border-color: transparent transparent transparent #D0D5EC;
+        ;
+    }
+
+    .mesaj-sol::after {
+        content: "";
+        position: absolute;
+        left: -10px;
+        top: 10px;
+        border-width: 10px;
+        border-style: solid;
+        border-color: transparent #F1F0F0 transparent transparent;
+    }
+</style>

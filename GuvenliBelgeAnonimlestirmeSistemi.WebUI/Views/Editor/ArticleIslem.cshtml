@@ -1,0 +1,725 @@
+﻿@using GuvenliBelgeAnonimlestirmeSistemi.WebApi.Dto.LogDtos
+@using GuvenliBelgeAnonimlestirmeSistemi.WebUI.Models.FieldTopic
+
+@model ArticleViewModel
+@{
+    ViewData["Title"] = "ArticleIslem";
+    Layout = "~/Views/Shared/_EditorLayout.cshtml";
+
+}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-2">
+        <h4 class="mb-0"><i class="fas fa-tools me-2"></i> Makale İşlem Sayfası</h4>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg text-white" style="background-color:#283747">
+                    📄 Makale Bilgileri
+                </div>
+                <div class="card-body">
+                    <p><strong>Makale Id:</strong> @Model.MakaleId</p>
+                    <p><strong>Yüklenme Tarihi:</strong> @Model.MakaleYuklemeTarihi.ToString("dd.MM.yyyy HH:mm")</p>
+                    <p><strong>Takip Numarası:</strong> @Model.TakipNo</p>
+                    <p><strong>Yazar E-Posta:</strong> @Model.YazarEPosta</p>
+                    @{
+                        string badgeStyle;
+                        string badgeText;
+
+                        switch (@Model.MakaleDurumu)
+                        {
+                            case ArticleStatus.MakaleBeklemede:
+                                badgeStyle = "background-color: #ffecb3; color: #856404;";
+                                badgeText = "Makale Beklemede";
+                                break;
+                            case ArticleStatus.RevizeEdildi:
+                                badgeStyle = "background-color: #f8d7da; color: #721c24;";
+                                badgeText = "Revize Edildi";
+                                break;
+                            case ArticleStatus.EditorIncelemede:
+                                badgeStyle = "background-color: #cce5ff; color: #004085;";
+                                badgeText = "Editör İncelemede";
+                                break;
+                            case ArticleStatus.HakemeAtandi:
+                                badgeStyle = "background-color: #d1ecf1; color: #0c5460;";
+                                badgeText = "Hakeme Atandı";
+                                break;
+                            case ArticleStatus.HakemDegerlendirilmesinde:
+                                badgeStyle = "background-color: #e2e3e5; color: #383d41;";
+                                badgeText = "Hakem Değerlendirmesinde";
+                                break;
+                            case ArticleStatus.HakemDegerlendirdi:
+                                badgeStyle = "background-color: #d4edda; color: #155724;";
+                                badgeText = "Hakem Değerlendirdi";
+                                break;
+                            case ArticleStatus.EditorSonuclandirmada:
+                                badgeStyle = "background-color: #b8daff; color: #004085;";
+                                badgeText = "Editör Sonuçlandırmada";
+                                break;
+                            case ArticleStatus.MakaleSonuclandirildi:
+                                badgeStyle = "background-color: #c3e6cb; color: #155724;";
+                                badgeText = "Makale Sonuçlandırıldı";
+                                break;
+                            case ArticleStatus.MakaleSonucuYazaraIletildi:
+                                badgeStyle = "background-color: #c3e6cb; color: #155724;";
+                                badgeText = "Sonuç Yazara İletildi";
+                                break;
+                            default:
+                                badgeStyle = "background-color: #fefefe; color: #818182;";
+                                badgeText = "Bilinmeyen Durum";
+                                break;
+                        }
+                    }
+
+                    <p><strong>Durum:</strong> <span class="badge" style="@badgeStyle">@badgeText</span></p>
+                    <p><strong>Alan Ataması Durumu:</strong> @(Model.IlgiAlanlari != null && Model.IlgiAlanlari.Any() ? string.Join(", ", Model.IlgiAlanlari) : "Henüz yapılmadı")</p>
+                    <p><strong>Anonimleştirme Durumu:</strong> @(string.IsNullOrEmpty(Model.AnonimPdfFilePath) ? "Henüz anonimleştirilmedi" : "Anonimleştirildi")</p>
+                    <p><strong>En Son Yapılan İşlem Tarihi:</strong> @(Model.EnSonYapilanIsleminTarihi.HasValue ? Model.EnSonYapilanIsleminTarihi.Value.ToString("dd.MM.yyyy HH:mm") : "Yok")</p>
+                    <p><strong>Atanmış Hakem:</strong> @(Model.ReviewerId.HasValue && Model.OnerilenHakemler != null && Model.OnerilenHakemler.Any(h => h.ReviewerId == Model.ReviewerId) ? Model.OnerilenHakemler.First(h => h.ReviewerId == Model.ReviewerId).EPosta : "Henüz atanmadı")</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            @if (!string.IsNullOrEmpty(Model.PdfFilePath))
+            {
+                <div class="card mb-4">
+                    <div class="card-header bg text-white" style="background-color:#283747">
+                        📄 Orijinal PDF
+                    </div>
+                    <div class="card-body p-0" style="overflow: auto;">
+                        <iframe src="@Model.PdfFilePath" width="100%" height="400px"></iframe>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </div>
+    <div class="card mb-4">
+        <div class="card-header bg text-white" style="background-color:#283747">
+            <i class="fas fa-history me-2"></i> Log Kayıtları
+        </div>
+        <div class="card-body">
+            @if (ViewBag.Loglar != null && ((List<LogDto>)ViewBag.Loglar).Any())
+            {
+                var logs = (List<LogDto>)ViewBag.Loglar;
+                <ul class="list-group">
+                    @foreach (var log in logs)
+                    {
+                        <li class="list-group-item">
+                            <strong>@log.islemZamani.ToString("dd.MM.yyyy HH:mm"):</strong> @log.LogDetayi
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <div class="alert alert-secondary">Henüz log kaydı yok.</div>
+            }
+
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header bg text-white" style="background-color:#bccad6 ">
+            <i class="fas fa-book-reader me-1"></i> Alan Tara
+        </div>
+        <div class="card-body">
+            <form method="post" asp-action="AlanAtama" asp-controller="Editor" class="mb-3">
+                <input type="hidden" name="MakaleId" value="@Model.MakaleId" />
+                <button type="submit" class="btn btn-outline-success">
+                    <i class="fas fa-search me-1"></i> Alan Ataması Yap
+                </button>
+            </form>
+            @if (ViewBag.AtanmisAlanlar != null && ((List<GetArticleTopicDto>)ViewBag.AtanmisAlanlar).Any())
+            {
+                var alanlar = (List<GetArticleTopicDto>)ViewBag.AtanmisAlanlar;
+
+                <ul class="list-group">
+                    @foreach (var alan in alanlar)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>@alan.AlanAdi</span>
+                            <span class="badge bg-primary rounded-pill">@($"{alan.Skor * 100:F1}%")</span>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <div class="alert alert-secondary">Henüz atanmış alan yok.</div>
+            }
+
+
+           
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg text-white" style=" background-color:#8d9db6">
+            <i class="fas fa-shield-alt"></i> Anonimleştirme İşlemi
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div style="font-size: 1rem; font-weight: 600;  color: #495057; border-bottom: 2px solid #6c757d; margin-bottom: 12px; padding-bottom: 4px;">
+                        <i class="fas fa-user-secret me-2"></i> Anonimleştirme Seçenekleri:
+                    </div>
+
+                    <form method="post" asp-action="Anonimlestir" asp-controller="Editor">
+                        <input type="hidden" name="MakaleId" value="@Model.MakaleId" />
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="AnonimYazarAdi" value="true" name="AnonimYazarAdi" />
+                            <label class="form-check-label" for="AnonimYazarAdi">Yazar Ad-Soyad</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="AnonimYazarIletisim" value="true" name="AnonimYazarIletisim" />
+                            <label class="form-check-label" for="AnonimYazarIletisim">Yazar İletişim Bilgileri</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="AnonimYazarKurum" value="true" name="AnonimYazarKurum" />
+                            <label class="form-check-label" for="AnonimYazarKurum">Yazar Kurum Bilgileri</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-success mt-3">
+                            <i class="fas fa-user-secret"></i> Anonimleştir
+                        </button>
+                        <button type="submit"
+                                formaction="@Url.Action("AnonimKaldir", "Editor")"
+                                formmethod="post"
+                                class="btn btn-danger mt-3"
+                        @(Model.MakaleDurumu == ArticleStatus.HakemDegerlendirdi && !string.IsNullOrEmpty(Model.AnonimPdfFilePath) ? "" : "disabled")>
+                            <i class="fas fa-eye-slash"></i> Anonimleştirmeyi Kaldır
+                        </button>
+
+                    </form>
+
+
+                    <input type="hidden" id="pdfUrl" value="@Url.Content(Model.PdfFilePath)" />
+                    <div style="font-size: 1rem; font-weight: 600;  color: #495057; border-bottom: 2px solid #6c757d; margin-bottom: 12px; padding-bottom: 4px;">
+                        <i class="fas fa-user-secret me-2"></i> Yazar Bilgileri:
+                    </div>
+                    <div class="card-body">
+
+                        <div class="mb-3">
+                            <div style="font-size: 1rem; font-weight: 600; color: #495057; border-bottom: 2px solid #6c757d; padding-bottom: 4px;">
+                                <i class="fas fa-user me-2"></i> Ad-Soyadlar
+                            </div>
+                            <div style="display: inline-flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+                                @if (Model.YazarAdlari != null && Model.YazarAdlari.Any())
+                                {
+                                    foreach (var author in Model.YazarAdlari)
+                                    {
+                                        <div style="background: #f1f1f1; padding: 3px 8px; border-radius: 4px; font-size: 13px;">
+                                            @author
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Bilgi yok</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div style="font-size: 1rem; font-weight: 600; color: #495057; border-bottom: 2px solid #6c757d; padding-bottom: 4px;">
+                                <i class="fas fa-building me-2"></i> Kurumlar
+                            </div>
+                            <div style="display: inline-flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+                                @if (Model.KurumBilgileri != null && Model.KurumBilgileri.Any())
+                                {
+                                    foreach (var kurum in Model.KurumBilgileri)
+                                    {
+                                        <div style="background: #f1f1f1; padding: 3px 8px; border-radius: 4px; font-size: 13px;">
+                                            @kurum
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Bilgi yok</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div style="font-size: 1rem; font-weight: 600; color: #495057; border-bottom: 2px solid #6c757d; padding-bottom: 4px;">
+                                <i class="fas fa-envelope me-2"></i> İletişim Bilgileri
+                            </div>
+                            <div style="display: inline-flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+                                @if (Model.EmailBilgileri != null && Model.EmailBilgileri.Any())
+                                {
+                                    foreach (var mail in Model.EmailBilgileri)
+                                    {
+                                        <div style="background: #f1f1f1; padding: 3px 8px; border-radius: 4px; font-size: 13px;">
+                                            @mail
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Bilgi yok</span>
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+                       
+                       
+
+                </div>
+
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label fw-bold mb-0">
+                            <i class="fas fa-file-pdf me-2"></i> Anonim PDF Önizleme
+                        </label>
+                        @if (!string.IsNullOrEmpty(Model.AnonimPdfFilePath))
+                        {
+                            <a href="@Model.AnonimPdfFilePath?v=@Guid.NewGuid()" target="_blank" class="btn btn-outline-danger btn-sm" download>
+                                <i class="fas fa-download me-1"></i> Anonim PDF İndir
+                            </a>
+
+                        }
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.AnonimPdfFilePath))
+                    {
+                        <iframe src="@Model.AnonimPdfFilePath?v=@Guid.NewGuid()" width="100%" height="500px"
+                                style="border:1px solid #ccc; border-radius:8px;"></iframe>
+                    }
+                    else
+                    {
+                        <div class="alert alert-secondary">Henüz anonimleştirilmiş bir PDF yok.</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg text-white" style=" background-color:#667292;"> <i class="fa-solid fa-pen-fancy"></i>  Hakem Atama İşlemi</div>
+        <div class="card-body">
+            <form method="post" asp-action="AssignReviewer" asp-controller="Editor">
+                <input type="hidden" name="ArticleId" value="@Model.MakaleId" />
+                <select name="ReviewerId" class="form-select mb-2">
+                    <option value="">Hakem Seçin</option>
+                    @if (Model.OnerilenHakemler != null && Model.OnerilenHakemler.Any())
+                    {
+                        foreach (var hakem in Model.OnerilenHakemler)
+                        {
+                            if (Model.ReviewerId!=null && Model.ReviewerId==hakem.ReviewerId)
+                            {
+                                <option value="@hakem.ReviewerId" selected>@hakem.EPosta</option>
+                            }
+                            else
+                            {
+                                <option value="@hakem.ReviewerId">@hakem.EPosta</option>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <option disabled>Önerilen hakem yok</option>
+                    }
+                </select>
+                <button type="submit" class="btn btn-success" @(string.IsNullOrEmpty(Model.AnonimPdfFilePath) ? "disabled" : "")>
+                    <i class="fas fa-user-plus me-1"></i> Hakem Ata
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header text-white" style="background-color:#1A4164">
+            <i class="fas fa-envelope-open-text me-1"></i> Değerlendirme Sonuç Gönderme İşlemi
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Hakem Değerlendirmesi</label>
+                        @if (!string.IsNullOrWhiteSpace(Model.HakemDegerlendirmesi))
+                        {
+                            <div class="p-3 bg-light border rounded" style="min-height: 200px;">
+                                @Html.Raw(Model.HakemDegerlendirmesi.Replace("\n", "<br />"))
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-secondary">Henüz bir hakem değerlendirmesi yapılmadı.</div>
+                        }
+                    </div>
+
+                    <form method="post" asp-action="SonucGonder" asp-controller="Editor">
+                        <input type="hidden" name="MakaleId" value="@Model.MakaleId" />
+
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" type="submit"
+                                    formaction="@Url.Action("PdfBirlestir", "Editor")"
+                                    formmethod="post"
+                            @(Model.MakaleDurumu == ArticleStatus.EditorSonuclandirmada &&
+                                !string.IsNullOrWhiteSpace(Model.HakemDegerlendirmesi) &&
+                                !string.IsNullOrWhiteSpace(Model.SonucPdfFilePath)
+                                ? "" : "disabled")>
+                                <i class="fas fa-lock-open me-1"></i> Değerlendirme Sonuç Pdf Getir
+                            </button>
+
+                            <button class="btn btn-success" type="submit"
+                                    formaction="@Url.Action("SonucGonder", "Editor")"
+                                    formmethod="post"
+                            @(Model.MakaleDurumu == ArticleStatus.MakaleSonuclandirildi &&
+                                !string.IsNullOrEmpty(Model.SonucPdfFilePath)
+                                ? "" : "disabled")>
+                                <i class="fas fa-paper-plane me-1"></i> Sonucu Yazara Gönder
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+
+                <div class="col-md-7">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label fw-bold">Sonuç PDF Önizleme</label>
+                        @if (!string.IsNullOrEmpty(Model.SonucPdfFilePath))
+                        {
+                            <a href="@Model.SonucPdfFilePath" target="_blank" class="btn btn-outline-danger btn-sm" download>
+                                <i class="fas fa-download me-1"></i> Sonuç PDF İndir
+                            </a>
+                        }
+                    </div>
+                   
+                    @if (Model.MakaleDurumu >= ArticleStatus.MakaleSonuclandirildi && !string.IsNullOrEmpty(Model.SonucPdfFilePath))
+                    {
+                        <iframe src="@Url.Content(Model.SonucPdfFilePath + "?v=" + DateTime.Now.Ticks)"
+                                width="100%"
+                                height="500px"
+                                style="border:1px solid #ccc; border-radius:8px;">
+                        </iframe>
+                    }
+                    else
+                    {
+                        <div class="alert alert-secondary">Henüz birleştirilmiş PDF oluşturulmadı.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+<div id="mesajPaneli" class="mesaj-panel shadow-lg">
+    <div class="mesaj-baslik">
+        <h5><i class="fa-solid fa-envelope"></i> Editör ile Mesajlaşma</h5>
+    </div>
+    <div id="mesajlar" class="mesaj-icerik"></div>
+
+    <form id="mesajForm" class="mesaj-form">
+        <input type="hidden" id="makaleId" value="@Model.MakaleId" />
+        <div class="input-group">
+            <input type="text" id="mesajInput" class="form-control" placeholder="Mesajınızı yazın..." required />
+            <button type="submit" class="btn btn-success">
+                <span><i class="fa-regular fa-paper-plane"></i></span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<button id="mesajAc" class="mesaj-toggle btn btn-primary">
+    <i class="fa-solid fa-envelope"></i> Mesajlar
+</button>
+
+<div id="mesajPaneli" class="mesaj-panel shadow-lg">
+    <div class="mesaj-baslik">
+        <h5><i class="fa-solid fa-envelope"></i> Editör ile Mesajlaşma</h5>
+    </div>
+    <div id="mesajlar" class="mesaj-icerik">
+    </div>
+    <form id="mesajForm" class="mesaj-form">
+        <input type="hidden" name="makaleNo" id="makaleNo" value="@Model.MakaleId" />
+        <div class="input-group">
+            <input type="text" id="mesajInput" class="form-control" placeholder="Mesajınızı yazın..." required />
+            <button type="submit" class="btn btn-success">
+                <span><i class="fa-regular fa-paper-plane"></i> Gönder</span>
+            </button>
+        </div>
+    </form>
+
+</div>
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+     $(document).ready(function () {
+        const mesajInput = $("#mesajInput");
+        const mesajForm = $("#mesajForm");
+        const mesajList = $("#mesajlar");
+        const makaleId = $("#makaleNo").val();
+
+        $("#mesajAc").click(function () {
+            $("#mesajPaneli").toggleClass("acik");
+
+            if ($("#mesajPaneli").hasClass("acik")) {
+                $("#mesajAc").addClass("buton-kucuk").html('<i class="fa-solid fa-comments"></i>').css({
+                    "right": "310px",
+                    "width": "40px",
+                    "height": "50px"
+                });
+            } else {
+                $("#mesajAc").removeClass("buton-kucuk").html('<i class="fa-solid fa-envelope"></i> Mesajlar').css({
+                    "right": "20px",
+                    "width": "150px",
+                    "height": "50px"
+                });
+            }
+        });
+
+        $("#mesajKapat").click(function () {
+            $("#mesajPaneli").removeClass("acik");
+            $("#mesajAc").removeClass("buton-kucuk").html('<i class="fa-solid fa-envelope"></i> Mesajlar').css({
+                "right": "20px",
+                "width": "150px",
+                "height": "50px"
+            });
+        });
+
+        async function sendMessage(event) {
+            event.preventDefault();
+
+            const mesajContent = mesajInput.val().trim();
+            if (!mesajContent) {
+                alert("Mesaj boş olamaz!");
+                return;
+            }
+
+            const mesajData = {
+                MakaleId : parseInt(makaleId),
+                SendRol: 0,
+                MessageContent: mesajContent
+            };
+
+            try {
+                const response = await fetch("https://localhost:7057/api/Messages", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(mesajData)
+                });
+
+                if (!response.ok) throw new Error(`API Hatası: ${response.status}`);
+
+                mesajInput.val("");
+                await loadMessages();
+            } catch (error) {
+                console.error("Mesaj gönderirken hata oluştu:", error);
+            }
+        }
+
+        mesajForm.on("submit", sendMessage);
+
+        async function loadMessages() {
+            try {
+                const response = await fetch(`https://localhost:7057/api/Messages/GetMessagesByArticle?articleId=${makaleId}`);
+                const messages = await response.json();
+
+                mesajList.empty();
+
+                messages.forEach(msg => {
+                    const messageClass = msg.sendRol === 0 ? "mesaj-sag" : "mesaj-sol";
+                    const senderText = msg.sendRol === 1 ? "<b>Yazar</b><br/>" : "";
+
+                    const messageItem = $(`
+                        <div class="mesaj ${messageClass}">
+                            ${senderText} ${msg.messageContent}
+                            <br><small>${new Date(msg.sendTime).toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' })}</small>
+                        </div>
+                    `);
+                    mesajList.append(messageItem);
+                });
+
+                mesajList.scrollTop(mesajList[0].scrollHeight);
+            } catch (error) {
+                console.error("Mesajları çekerken hata oluştu:", error);
+            }
+        }
+
+        loadMessages();
+        setInterval(loadMessages, 5000);
+    });
+    
+</script>
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .card {
+        border-radius: 12px;
+    }
+
+    .card-header {
+        font-weight: 600;
+    }
+
+    .mesaj-panel {
+        position: fixed;
+        right: -350px;
+        top: 88px;
+        width: 300px;
+        height: 650px;
+        background: white;
+        border-left: 2px solid #2d3750;
+        box-shadow: -3px 0 10px rgba(0, 0, 0, 0.2);
+        transition: right 0.5s ease-in-out;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .mesaj-panel.acik {
+            right: 10px;
+        }
+
+    .mesaj-baslik {
+        background: #1c2331;
+        color: white;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+    }
+
+    .mesaj-icerik {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+        background: #f8f9fa;
+    }
+
+    .mesaj-form {
+        padding: 10px;
+        background: #fff;
+        border-top: 1px solid #ddd;
+    }
+
+    .mesaj-toggle {
+        background-color: #1c2331;
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 1001;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 30px;
+        width: 150px;
+        height: 50px;
+        text-align: center;
+        transition: all 0.5s ease-in-out;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+        .mesaj-toggle,
+        .mesaj-toggle:hover,
+        .mesaj-toggle:focus,
+        .mesaj-toggle:active {
+            background-color: #1c2331 !important;
+            color: white !important;
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+            transition: none !important;
+        }
+
+    .buton-kucuk {
+        background-color: #1c2331;
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 16px;
+        padding: 8px;
+        border-top-right-radius: 2px;
+        border-bottom-right-radius: 2px;
+        text-align: center;
+        transition: all 0.5s ease-in-out;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    .mesaj {
+        width: 220px;
+        padding: 10px 15px;
+        margin: 8px;
+        border-radius: 18px;
+        font-size: 14px;
+        display: inline-block;
+        position: relative;
+        word-wrap: break-word;
+    }
+
+    .mesaj-sag {
+        background-color: #D0D5EC;
+        color: black;
+        align-self: flex-end;
+        text-align: left;
+        border: 1px solid #A6AECF;
+        border-top-right-radius: 5px;
+        margin-left: auto;
+        margin-right: 0px;
+    }
+
+    .mesaj-sol {
+        background-color: #F1F0F0;
+        color: black;
+        align-self: flex-start;
+        text-align: left;
+        border: 1px solid #D1D1D1;
+        border-top-left-radius: 5px;
+        margin-right: auto;
+        margin-left: 0px;
+    }
+
+    .mesaj + .mesaj {
+        margin-top: 5px;
+    }
+
+    .mesaj small {
+        display: block;
+        text-align: right;
+        font-size: 12px;
+        color: gray;
+        margin-top: 5px;
+    }
+
+    .mesaj-sag::after {
+        content: "";
+        position: absolute;
+        right: -10px;
+        top: 10px;
+        border-width: 10px;
+        border-style: solid;
+        border-color: transparent transparent transparent #D0D5EC;
+        ;
+    }
+
+    .mesaj-sol::after {
+        content: "";
+        position: absolute;
+        left: -10px;
+        top: 10px;
+        border-width: 10px;
+        border-style: solid;
+        border-color: transparent #F1F0F0 transparent transparent;
+    }
+
+    body {
+        padding-top: 80px; 
+    }
+
+</style>
